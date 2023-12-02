@@ -13,6 +13,7 @@ ignore = [
   "CPY001",  # missing-copyright-notice: unnecessary
   # pydocstyle
   "D100",  # undocumented-public-module: excessive
+  "D104",  # undocumented-public-package: excessive
   "D103",  # undocumented-public-function: excessive
   # pylint
   "PLR2004",  # magic-value-comparison: sometimes you need a little magic
