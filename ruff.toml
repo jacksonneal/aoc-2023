@@ -1,0 +1,19 @@
+target-version = "py312"
+preview = true
+select = ["ALL"]
+ignore = [
+  # flake8-annotations
+  "ANN101",  # missing-type-self: unnecessary, can be inferred from context
+  "ANN102",  # missing-type-cls: unnecessary, can be inferred from context
+  # eradicate
+  "ERA001",  # commented-out-code: helpful for examples
+  # flake8-bandit
+  "S101", # assert: helpful for type checking
+  # flake8-copyright
+  "CPY001",  # missing-copyright-notice: unnecessary
+  # pydocstyle
+  "D100",  # undocumented-public-module: excessive
+  "D103",  # undocumented-public-function: excessive
+  # pylint
+  "PLR2004",  # magic-value-comparison: sometimes you need a little magic
+]
