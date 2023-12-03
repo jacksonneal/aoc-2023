@@ -18,3 +18,5 @@ ignore = [
   # pylint
   "PLR2004",  # magic-value-comparison: sometimes you need a little magic
 ]
+[lint.pylint]
+max-bool-expr = 6  # something reasonable
