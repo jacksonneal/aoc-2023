@@ -1,5 +1,6 @@
 # ruff: noqa: T201
 import re
+from collections import defaultdict
 from pathlib import Path
 from typing import TypeVar
 
@@ -129,9 +130,97 @@ def day2b() -> int:
     return total
 
 
+def day3a() -> int:
+    lines = get_lines("day3.txt")
+
+    n_map: dict[int, list[tuple[int, int, int]]] = defaultdict(list)
+    s_map: dict[int, list[int]] = defaultdict(list)
+
+    for i, ln in enumerate(lines):
+        line = ln.strip()
+        numbers = re.finditer(r"\d+", line)
+        for number in numbers:
+            n_map[i].append((number.start(0), number.end(0), int(number.group(0))))
+        symbols = re.finditer(r"[^\d.]", line)
+        for symbol in symbols:
+            s_map[i].append(symbol.start(0))
+
+    total = 0
+    for row in n_map:
+        for start, end, number in n_map[row]:
+            for i in range(start, end):
+                if (
+                    i == start
+                    and (
+                        i - 1 in s_map[row - 1]
+                        or i - 1 in s_map[row]
+                        or i - 1 in s_map[row + 1]
+                    )
+                    or i in s_map[row - 1]
+                    or i in s_map[row + 1]
+                    or i == end - 1
+                    and (
+                        i + 1 in s_map[row - 1]
+                        or i + 1 in s_map[row]
+                        or i + 1 in s_map[row + 1]
+                    )
+                ):
+                    total += number
+    return total
+
+
+def day3b() -> int:
+    lines = get_lines("day3.txt")
+
+    n_map: dict[int, list[tuple[int, int, int]]] = defaultdict(list)
+    for i, ln in enumerate(lines):
+        line = ln.strip()
+        numbers = re.finditer(r"\d+", line)
+        for number in numbers:
+            n_map[i].append((number.start(0), number.end(0), int(number.group(0))))
+
+    def get_digit(i: int, j: int) -> tuple[int, int, int] | None:
+        for start, end, number in n_map[i]:
+            if start <= j < end:
+                return start, end, number
+        return None
+
+    def get_digits_around(i: int, j: int) -> list[int]:
+        digits: set[tuple[int, int, int]] = set()
+        for x, y in [
+            (i - 1, j - 1),
+            (i, j - 1),
+            (i + 1, j - 1),
+            (i - 1, j),
+            (i, j),
+            (i + 1, j),
+            (i - 1, j + 1),
+            (i, j + 1),
+            (i + 1, j + 1),
+        ]:
+            digit = get_digit(x, y)
+            if digit is not None:
+                digits.add(digit)
+        return [y[2] for y in digits]
+
+    total = 0
+    for i, ln in enumerate(lines):
+        line = ln.strip()
+        for j, char in enumerate(line):
+            if char == "*":
+                digits = get_digits_around(i, j)
+                if len(digits) == 2:
+                    total += digits[0] * digits[1]
+
+    return total
+
+
 if __name__ == "__main__":
     # assert day1a() == 54159
     # assert day1b() == 53866
 
     # assert day2a() == 2679
-    assert day2b() == 77607
+    # assert day2b() == 77607
+
+    # assert day3a() == 556057
+    print(day3b())
