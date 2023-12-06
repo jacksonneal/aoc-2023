@@ -215,6 +215,61 @@ def day3b() -> int:
     return total
 
 
+def day4a() -> int:
+    lines = get_lines("day4.txt")
+    total = 0
+
+    for line in lines:
+        winning_numbers: list[int] = []
+        my_numbers: list[int] = []
+        i = 0
+        for match in re.finditer(r"\d+\s", line):
+            if i < 10:
+                winning_numbers.append(int(match.group(0)))
+            else:
+                my_numbers.append(int(match.group(0)))
+            i += 1
+
+        num_winning = 0
+        for n in my_numbers:
+            if n in winning_numbers:
+                num_winning += 1
+        if num_winning > 0:
+            total += 2 ** (num_winning - 1)
+
+    return int(total)
+
+
+def day4b() -> int:
+    lines = get_lines("day4.txt")
+
+    total = 0
+    copies: dict[int, int] = defaultdict(lambda: 1)
+
+    for li, line in enumerate(lines):
+        winning_numbers: list[int] = []
+        my_numbers: list[int] = []
+        i = 0
+        for match in re.finditer(r"\d+\s", line):
+            if i < 10:
+                winning_numbers.append(int(match.group(0)))
+            else:
+                my_numbers.append(int(match.group(0)))
+            i += 1
+
+        num_winning = 0
+        for n in my_numbers:
+            if n in winning_numbers:
+                num_winning += 1
+
+        for _ in range(copies[li]):
+            total += 1
+            for ni in range(1, num_winning + 1):
+                copies[li + ni] += 1
+
+    return int(total)
+
+
 if __name__ == "__main__":
     # assert day1a() == 54159
     # assert day1b() == 53866
@@ -223,4 +278,8 @@ if __name__ == "__main__":
     # assert day2b() == 77607
 
     # assert day3a() == 556057
-    print(day3b())
+    # assert day3b() == 82824352
+
+    # assert day4a() == 20407
+    # assert day4b() == 23806951
+    pass
