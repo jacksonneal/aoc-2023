@@ -1,6 +1,8 @@
 # ruff: noqa: T201
 import re
 from collections import defaultdict
+from collections.abc import Generator
+from functools import reduce
 from pathlib import Path
 from typing import TypeVar
 
@@ -270,6 +272,152 @@ def day4b() -> int:
     return int(total)
 
 
+def day5a() -> int:
+    lines = get_lines("day5.txt")
+
+    seeds = [int(x) for x in lines[0].split(":")[1].split()]
+
+    def parse(i: int = 3) -> list[list[tuple[int, int, int]]]:
+        ret: list[list[tuple[int, int, int]]] = []
+        while i < len(lines):
+            current: list[tuple[int, int, int]] = []
+            while i < len(lines) and lines[i] != "\n":
+                s2, s1, length = (int(x) for x in lines[i].split())
+                current.append((s1, s1 + length, s2 - s1))
+                i += 1
+            ret.append(sorted(current))
+            i += 2
+        return ret
+
+    mappings = list(parse())
+
+    def translate(mapping: list[tuple[int, int, int]], seed: int) -> int:
+        for a1, a2, d in mapping:
+            if a1 <= seed < a2:
+                return seed + d
+        return seed
+
+    def solve() -> int:
+        outs: list[int] = []
+        for seed in seeds:
+            cur = seed
+            for mapping in mappings:
+                cur = translate(mapping, cur)
+            outs.append(cur)
+        return min(outs)
+
+    return solve()
+
+
+def day5b() -> int:
+    lines = get_lines("day5.txt")
+
+    seeds = [int(x) for x in lines[0].split(":")[1].split()]
+
+    def parse(i: int = 3) -> list[list[tuple[int, int, int]]]:
+        ret: list[list[tuple[int, int, int]]] = []
+        while i < len(lines):
+            current: list[tuple[int, int, int]] = []
+            while i < len(lines) and lines[i] != "\n":
+                s2, s1, length = (int(x) for x in lines[i].split())
+                current.append((s1, s1 + length, s2 - s1))
+                i += 1
+            ret.append(sorted(current))
+            i += 2
+        return ret
+
+    mappings = list(parse())
+
+    def translate(
+        mapping: list[tuple[int, int, int]],
+        pairs: Generator[tuple[int, int], None, None] | list[tuple[int, int]],
+    ) -> Generator[tuple[int, int], None, None]:
+        for start, end in pairs:
+            for a1, a2, d in mapping:
+                yield (start, min(a1, end))
+                yield (max(a1, start) + d, min(a2, end) + d)
+                start = max(start, min(a2, end))  # noqa: PLW2901
+            yield (start, end)
+
+    def solve(
+        mappings: list[list[tuple[int, int, int]]],
+        seed: Generator[tuple[int, int], None, None] | list[tuple[int, int]],
+    ) -> int:
+        for mapping in mappings:
+            seed = [(a, b) for a, b in translate(mapping, seed) if a < b]
+        return min(a for a, _b in seed)
+
+    return solve(
+        mappings,
+        ((x, x + y) for x, y in zip(seeds[::2], seeds[1::2], strict=True)),
+    )
+
+
+def day6a() -> int:
+    lines = get_lines("day6.txt")
+
+    times = [int(x) for x in lines[0].split(":")[1].split()]
+    distances = [int(x) for x in lines[1].split(":")[1].split()]
+
+    tds = zip(times, distances, strict=True)
+
+    ways: list[int] = []
+    for t, d in tds:
+        first = None
+        last = None
+        for h in range(1, t + 1):
+            if (t - h) * h > d:
+                first = h
+                break
+        if first is None:
+            ways.append(0)
+            continue
+        for h in range(t + 1, 1, -1):
+            if (t - h) * h > d:
+                last = h
+                break
+        if last is None:
+            ways.append(0)
+            break
+        ways.append(last + 1 - first)
+
+    return reduce(lambda x, y: x * y, ways)
+
+
+def day6b() -> int:
+    lines = get_lines("day6.txt")
+
+    time = int("".join(lines[0].split(":")[1].split()))
+    times = [time]
+
+    distance = int("".join(lines[1].split(":")[1].split()))
+    distances = [distance]
+
+    tds = zip(times, distances, strict=True)
+
+    ways: list[int] = []
+    for t, d in tds:
+        first = None
+        last = None
+        for h in range(1, t + 1):
+            if (t - h) * h > d:
+                first = h
+                break
+        if first is None:
+            ways.append(0)
+            continue
+        for h in range(t + 1, 1, -1):
+            if (t - h) * h > d:
+                last = h
+                break
+        if last is None:
+            ways.append(0)
+            break
+        ways.append(last + 1 - first)
+
+    return reduce(lambda x, y: x * y, ways)
+
+
 if __name__ == "__main__":
     # assert day1a() == 54159
     # assert day1b() == 53866
@@ -282,4 +430,9 @@ if __name__ == "__main__":
 
     # assert day4a() == 20407
     # assert day4b() == 23806951
-    pass
+
+    # assert day5a() == 379811651
+    # assert day5b() == 27992443
+
+    assert day6a() == 1108800
+    print(day6b())
