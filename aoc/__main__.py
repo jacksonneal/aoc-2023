@@ -1,8 +1,10 @@
 # ruff: noqa: T201
+import math
 import re
-from collections import defaultdict
+from collections import Counter, defaultdict
 from collections.abc import Generator
 from functools import reduce
+from itertools import cycle
 from pathlib import Path
 from typing import TypeVar
 
@@ -418,6 +420,173 @@ def day6b() -> int:
     return reduce(lambda x, y: x * y, ways)
 
 
+def day7a() -> int:
+    def is_n_oak(hand: str, n: int) -> str | None:
+        counter = Counter(hand)
+        for c in hand:
+            if n == counter[c]:
+                return c
+        return None
+
+    def get_hand_type(hand: str) -> int:
+        if is_n_oak(hand, 5) is not None:
+            return 7
+        if is_n_oak(hand, 4) is not None:
+            return 6
+        oak3 = is_n_oak(hand, 3)
+        if oak3 is not None and is_n_oak(re.sub(oak3, "", hand), 2) is not None:
+            return 5
+        if oak3 is not None:
+            return 4
+        oak2 = is_n_oak(hand, 2)
+        if oak2 is not None and is_n_oak(re.sub(oak2, "", hand), 2) is not None:
+            return 3
+        if oak2 is not None:
+            return 2
+        return 1
+
+    lines = get_lines("day7.txt")
+    hands: list[tuple[str, int, int]] = []
+    for line in lines:
+        hand, bid = line.split()
+        hand_type = get_hand_type(hand)
+        hands.append((hand, int(bid), hand_type))
+
+    card_to_rank_map = {
+        "A": 14,
+        "K": 13,
+        "Q": 12,
+        "J": 11,
+        "T": 10,
+    }
+
+    def card_to_rank(card: str) -> int:
+        if card in card_to_rank_map:
+            return card_to_rank_map[card]
+        return int(card)
+
+    def hand_key(hand: tuple[str, int, int]) -> list[int]:
+        ret = [hand[2]]
+        for c in hand[0]:
+            if c in card_to_rank_map:
+                ret.append(card_to_rank(c))
+            else:
+                ret.append(int(c))
+        return ret
+
+    hands = sorted(hands, key=hand_key)
+
+    total = 0
+    for i, hand in enumerate(hands):
+        total += (i + 1) * hand[1]
+    return total
+
+
+def day7b() -> int:
+    def get_hand_type(hand: str) -> int:
+        counter = Counter(hand)
+        n_js = counter["J"]
+        hand = re.sub("J", "", hand)
+
+        counter = Counter(hand)
+        sorted_counters = sorted(counter, key=lambda x: counter[x], reverse=True)
+        max_count = counter[sorted_counters[0]] if len(sorted_counters) > 0 else 0
+        second_max_count = (
+            counter[sorted_counters[1]] if len(sorted_counters) > 1 else 0
+        )
+
+        if max_count + n_js == 5:
+            return 7
+        if max_count + n_js == 4:
+            return 6
+        if max_count + second_max_count + n_js == 5:
+            return 5
+        if max_count + n_js == 3:
+            return 4
+        if max_count + second_max_count + n_js == 4:
+            return 3
+        if max_count + n_js == 2:
+            return 2
+        return 1
+
+    lines = get_lines("day7.txt")
+    hands: list[tuple[str, int, int]] = []
+    for line in lines:
+        hand, bid = line.split()
+        hand_type = get_hand_type(hand)
+        hands.append((hand, int(bid), hand_type))
+
+    card_to_rank_map = {
+        "A": 14,
+        "K": 13,
+        "Q": 12,
+        "J": 1,
+        "T": 10,
+    }
+
+    def card_to_rank(card: str) -> int:
+        if card in card_to_rank_map:
+            return card_to_rank_map[card]
+        return int(card)
+
+    def hand_key(hand: tuple[str, int, int]) -> list[int]:
+        ret = [hand[2]]
+        for c in hand[0]:
+            if c in card_to_rank_map:
+                ret.append(card_to_rank(c))
+            else:
+                ret.append(int(c))
+        return ret
+
+    hands = sorted(hands, key=hand_key)
+
+    total = 0
+    for i, hand in enumerate(hands):
+        total += (i + 1) * hand[1]
+    return total
+
+
+def day8a() -> int:
+    lines = get_lines("day8.txt")
+    lines = [x.strip() for x in lines]
+    instructions = lines[0]
+    mapping: dict[str, tuple[str, str]] = {}
+    for x in lines[2:]:
+        split = x.split()
+        mapping[split[0]] = (split[2][1:-1], split[3][:-1])
+
+    pos: str = "AAA"
+    n_steps = 0
+    while pos != "ZZZ":
+        next_step = instructions[n_steps % len(instructions)]
+        pos = mapping[pos][0 if next_step == "L" else 1]
+        n_steps += 1
+
+    return n_steps
+
+
+def day8b() -> int:
+    lines = get_lines("day8.txt")
+    lines = [x.strip() for x in lines]
+
+    instructions = lines[0]
+    mapping: dict[str, dict[str, str]] = {}
+    for x in lines[2:]:
+        split = x.split()
+        mapping[split[0]] = {"L": split[2][1:-1], "R": split[3][:-1]}
+
+    positions: list[str] = [x for x in mapping if x.endswith("A")]
+
+    def fn(pos: str) -> int:
+        for i, next_step in enumerate(cycle(instructions)):
+            pos = mapping[pos][next_step]
+            if pos.endswith("Z"):
+                return i + 1
+        return -1
+
+    return math.lcm(*[fn(p) for p in positions])
+
+
 if __name__ == "__main__":
     # assert day1a() == 54159
     # assert day1b() == 53866
@@ -434,5 +603,11 @@ if __name__ == "__main__":
     # assert day5a() == 379811651
     # assert day5b() == 27992443
 
-    assert day6a() == 1108800
-    print(day6b())
+    # assert day6a() == 1108800
+    # assert day6b() == 36919753
+
+    # assert day7a() == 241344943
+    # assert day7b() == 243101568
+
+    # assert day8a() == 13207
+    print(day8b())
