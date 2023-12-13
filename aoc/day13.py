@@ -57,5 +57,63 @@ def part_a() -> int:
     return total
 
 
+def part_b() -> int:
+    l = get_lines("day13.txt")
+    l = [x.strip() for x in l]
+
+    gs: list[list[str]] = []
+    cur_g: list[str] = []
+    for s in l:
+        if not s:
+            gs.append(cur_g)
+            cur_g = []
+        else:
+            cur_g.append(s)
+    gs.append(cur_g)
+
+    total = 0
+    for g in gs:
+        original_score = get_reflection_score(g)
+        new_score = original_score
+        for i in range(len(g)):
+            for j in range(len(g[i])):
+                if new_score != original_score:
+                    continue
+                cur = g.copy()
+                cur_sl = list(cur[i])
+                cur_sl[j] = "#" if cur[i][j] == "." else "#"
+                cur[i] = "".join(cur_sl)
+                try:
+                    new_score = get_reflection_score(cur)
+                except:  # noqa: E722
+                    print("failed")
+        if new_score != original_score:
+            total += new_score
+
+    return total
+
+
 if __name__ == "__main__":
-    print(part_a())
+    # assert part_a() == 40006
+    assert part_b() == 28627
+    # print(part_b())
+    #
+    # l = get_lines("day13.txt")
+    # l = [x.strip() for x in l]
+    #
+    # gs: list[list[str]] = []
+    # cur_g: list[str] = []
+    # for s in l:
+    #     if not s:
+    #         gs.append(cur_g)
+    #         cur_g = []
+    #     else:
+    #         cur_g.append(s)
+    # gs.append(cur_g)
+    # patterns = gs
+    # def diff(p, j):
+    #     return sum(sum(a != b for a, b in zip(l[j:], l[j - 1::-1])) for l in p)
+    # mirror = lambda p, d: sum(j for j in range(1, len(p[0])) if diff(p, j) == d)
+    # summarize = lambda p, d: mirror(p, d) + 100 * mirror([*zip(*p)], d)
+    # print(sum(summarize(p, 0) for p in patterns))
+    # print(sum(summarize(p, 1) for p in patterns))
