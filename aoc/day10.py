@@ -64,7 +64,7 @@ def part_a() -> int:
 
 
 def part_b() -> int:
-    grid = [x.strip() for x in get_lines("day10-sample.txt")]
+    grid = [x.strip() for x in get_lines("day10.txt")]
     s = find_s(grid)
     _, seen = bfs(grid, s)
 
@@ -72,41 +72,21 @@ def part_b() -> int:
         if (x, y) in seen:
             return False
 
-        num_up_xs = 0
-        for i in range(x - 1, -1, -1):
-            if grid[i][y] in {"-", "F", "7", "J", "L"} and (i, y) in seen:
-                num_up_xs += 1
-        if num_up_xs % 2 != 0:
-            return True
+        num_xs = 0
+        i, j = x, y
+        while i < len(grid) and j < len(grid[0]):
+            cur = grid[i][j]
+            if (i, j) in seen and cur not in "L7S":
+                num_xs += 1
+            i += 1
+            j += 1
 
-        num_down_xs = 0
-        for i in range(x + 1, len(grid)):
-            if grid[i][y] in {"-", "J", "L", "F", "7"} and (i, y) in seen:
-                num_down_xs += 1
-        if num_down_xs % 2 != 0:
-            return True
-
-        num_right_xs = 0
-        for j in range(y + 1, len(grid[0])):
-            if grid[x][j] in {"|", "7", "J", "F", "L"} and (x, j) in seen:
-                num_right_xs += 1
-        if num_right_xs % 2 != 0:
-            return True
-
-        num_left_xs = 0
-        for j in range(y - 1, -1, -1):
-            if grid[x][j] in {"|", "F", "L", "J", "7"} and (x, j) in seen:
-                num_left_xs += 1
-        if num_left_xs % 2 != 0:
-            return True
-
-        return False
+        return num_xs % 2 != 0
 
     total = 0
     for i in range(len(grid)):
         for j in range(len(grid[i])):
             if in_loop(i, j):
-                print("in loop", i, j)
                 total += 1
 
     return total
