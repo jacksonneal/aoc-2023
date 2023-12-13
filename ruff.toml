@@ -5,6 +5,8 @@ ignore = [
   # flake8-annotations
   "ANN101",  # missing-type-self: unnecessary, can be inferred from context
   "ANN102",  # missing-type-cls: unnecessary, can be inferred from context
+  # pycodestyle (E)
+  "E741",  # ambiguous-variable-name: I like short names
   # eradicate
   "ERA001",  # commented-out-code: helpful for examples
   # flake8-bandit
@@ -24,4 +26,3 @@ max-branches = 15  # something reasonable
 max-returns = 10  # something reasonable
 [lint.mccabe]
 max-complexity = 25  # be generous
-

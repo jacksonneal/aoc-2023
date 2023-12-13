@@ -94,4 +94,5 @@ def part_b() -> int:
 
 if __name__ == "__main__":
     # assert part_a() == 6886
-    print(part_b())
+    # assert part_b() == 371
+    pass
