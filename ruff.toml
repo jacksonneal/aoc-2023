@@ -20,6 +20,7 @@ ignore = [
 ]
 [lint.pylint]
 max-bool-expr = 10  # something reasonable
+max-branches = 15  # something reasonable
 max-returns = 10  # something reasonable
 [lint.mccabe]
 max-complexity = 25  # be generous
