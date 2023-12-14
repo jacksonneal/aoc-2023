@@ -8,6 +8,10 @@ INPUTS_DIR = SCRIPT_DIR.parent / "inputs"
 T = TypeVar("T")
 
 
+def get_fp(fn: str) -> Path:
+    return INPUTS_DIR / fn
+
+
 def get_lines(fn: str) -> list[str]:
     return (INPUTS_DIR / fn).open().readlines()
 
