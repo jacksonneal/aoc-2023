@@ -1,7 +1,9 @@
 # ruff: noqa: T201
 
 
-from collections.abc import Iterator
+import re
+from collections.abc import Callable
+from functools import reduce
 from typing import TypeVar
 
 from aoc.util import get_fp
@@ -9,30 +11,39 @@ from aoc.util import get_fp
 T = TypeVar("T")
 
 
-def transpose(itr: Iterator[str]) -> Iterator[str]:
-    return map("".join, zip(*itr, strict=True))
+def apply_n(fn: Callable[[T], T], init: T, n: int) -> T:
+    return reduce(lambda acc, _: fn(acc), range(n), init)
 
 
-def roll_left(itr: Iterator[str]) -> Iterator[str]:
-    ret = itr
-    for _ in range(100):
-        ret = (e.replace(".O", "O.") for e in ret)
-    return ret
+def read_str(fn: str) -> str:
+    return get_fp(fn).open().read().replace("\n", " ")
 
 
-def left_load(itr: Iterator[str]) -> int:
-    return sum(i * (c == "O") for r in itr for i, c in enumerate(r[::-1], 1))
+def rotate_r(s: str) -> str:
+    return " ".join(map("".join, zip(*(s.split())[::-1], strict=True)))
+
+
+def roll_l(s: str) -> str:
+    return re.sub("[.O]+", lambda m: "".join(sorted(m[0])[::-1]), rotate_r(s))
+
+
+def load(s: str) -> int:
+    return sum(i for r in s.split() for i, c in enumerate(r[::-1], 1) if c == "O")
 
 
 def part_a() -> int:
-    return left_load(roll_left(transpose(get_fp("day14.txt").open())))
-
-
-def spin_cycle() -> None:
-    pass
+    return load(roll_l(apply_n(rotate_r, read_str("day14.txt"), 2)))
 
 
 def part_b() -> int:
+    d = apply_n(rotate_r, read_str("day14.txt"), 2)
+    n = 1000000000
+    c = {}
+    for r in range(n):
+        d = apply_n(roll_l, d, 4)
+        if s := c.get(d, 0):
+            return c[(n - s) % (r - s) + (s - 1)]
+        c |= {d: r, r: load(rotate_r(d))}
     return 0
 
 
