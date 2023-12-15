@@ -28,5 +28,14 @@ def part_a() -> int:
     return left_load(roll_left(transpose(get_fp("day14.txt").open())))
 
 
+def spin_cycle() -> None:
+    pass
+
+
+def part_b() -> int:
+    return 0
+
+
 if __name__ == "__main__":
-    print(part_a())
+    assert part_a() == 110565
+    print(part_b())
